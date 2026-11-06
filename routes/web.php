@@ -7,7 +7,7 @@ Route::get('/privacy-policy', 'HomeController@privacy_policy')->name('privacy_po
 Route::get('/terms-of-use', 'HomeController@terms_of_use')->name('terms_of_use');
 
 
-Route::group(['middleware' => 'auth'], function () {
+Route::group(['middleware' => ['auth', 'subscription.active']], function () {
 
     Route::get('/', 'HomeController@dashboard')->name('home');
     Route::get('/home', 'HomeController@dashboard')->name('home');
@@ -161,6 +161,8 @@ Route::group(['namespace' => 'SuperAdmin','middleware' => 'super_admin', 'prefix
 
     Route::get('/settings', 'SettingController@index')->name('settings');
     Route::put('/settings', 'SettingController@update')->name('settings.update');
+    Route::post('/subscriptions', 'SchoolSubscriptionController@store')->name('saas.subscriptions.store');
+    Route::put('/subscriptions/{subscription}', 'SchoolSubscriptionController@update')->name('saas.subscriptions.update');
 
 });
 
