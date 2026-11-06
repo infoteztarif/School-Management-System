@@ -10,7 +10,7 @@ class AddTenantIsolationAndRbac extends Migration
         'my_classes', 'sections', 'subjects', 'student_records', 'dorms',
         'exams', 'marks', 'grades', 'pins', 'skills', 'exam_records',
         'books', 'book_requests', 'staff_records', 'payments',
-        'payment_records', 'receipts', 'time_tables', 'promotions', 'settings'
+        'payment_records', 'receipts', 'time_table_records', 'time_slots', 'time_tables', 'promotions', 'settings'
     ];
 
     public function up()
