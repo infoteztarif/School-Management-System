@@ -7,11 +7,14 @@ Route::get('/privacy-policy', 'HomeController@privacy_policy')->name('privacy_po
 Route::get('/terms-of-use', 'HomeController@terms_of_use')->name('terms_of_use');
 
 
-Route::group(['middleware' => ['auth', 'subscription.active']], function () {
+Route::group(['middleware' => ['auth', 'subscription.active', 'session.track']], function () {
 
     Route::get('/', 'HomeController@dashboard')->name('home');
     Route::get('/home', 'HomeController@dashboard')->name('home');
     Route::get('/dashboard', 'HomeController@dashboard')->name('dashboard');
+
+    Route::get('/sessions', 'SessionController@index')->name('sessions.index');
+    Route::delete('/sessions/{id}', 'SessionController@revoke')->name('sessions.revoke');
 
     Route::group(['prefix' => 'my_account'], function() {
         Route::get('/', 'MyAccountController@edit_profile')->name('my_account');
@@ -23,7 +26,7 @@ Route::group(['middleware' => ['auth', 'subscription.active']], function () {
     Route::group(['namespace' => 'SupportTeam',], function(){
 
         /*************** Students *****************/
-        Route::group(['prefix' => 'students'], function(){
+        Route::group(['prefix' => 'students', 'middleware' => ['permission:students.view', 'tenant.audit']], function(){
             Route::get('reset_pass/{st_id}', 'StudentRecordController@reset_pass')->name('st.reset_pass');
             Route::get('graduated', 'StudentRecordController@graduated')->name('students.graduated');
             Route::put('not_graduated/{id}', 'StudentRecordController@not_graduated')->name('st.not_graduated')->middleware('teamSA');
@@ -40,12 +43,12 @@ Route::group(['middleware' => ['auth', 'subscription.active']], function () {
         });
 
         /*************** Users *****************/
-        Route::group(['prefix' => 'users'], function(){
+        Route::group(['prefix' => 'users', 'middleware' => ['permission:users.manage', 'tenant.audit']], function(){
             Route::get('reset_pass/{id}', 'UserController@reset_pass')->name('users.reset_pass');
         });
 
         /*************** TimeTables *****************/
-        Route::group(['prefix' => 'timetables'], function(){
+        Route::group(['prefix' => 'timetables', 'middleware' => ['permission:timetable.manage', 'tenant.audit']], function(){
             Route::get('/', 'TimeTableController@index')->name('tt.index');
 
             Route::group(['middleware' => 'teamSA'], function() {
@@ -82,7 +85,7 @@ Route::group(['middleware' => ['auth', 'subscription.active']], function () {
         });
 
         /*************** Payments *****************/
-        Route::group(['prefix' => 'payments'], function(){
+        Route::group(['prefix' => 'payments', 'middleware' => ['permission:payments.manage', 'tenant.audit']], function(){
 
             Route::get('manage/{class_id?}', 'PaymentController@manage')->name('payments.manage');
             Route::get('invoice/{id}/{year?}', 'PaymentController@invoice')->name('payments.invoice');
@@ -95,7 +98,7 @@ Route::group(['middleware' => ['auth', 'subscription.active']], function () {
         });
 
         /*************** Pins *****************/
-        Route::group(['prefix' => 'pins'], function(){
+        Route::group(['prefix' => 'pins', 'middleware' => ['permission:users.manage', 'tenant.audit']], function(){
             Route::get('create', 'PinController@create')->name('pins.create');
             Route::get('/', 'PinController@index')->name('pins.index');
             Route::post('/', 'PinController@store')->name('pins.store');
@@ -105,7 +108,7 @@ Route::group(['middleware' => ['auth', 'subscription.active']], function () {
         });
 
         /*************** Marks *****************/
-        Route::group(['prefix' => 'marks'], function(){
+        Route::group(['prefix' => 'marks', 'middleware' => ['permission:marks.manage', 'tenant.audit']], function(){
 
            // FOR teamSA
             Route::group(['middleware' => 'teamSA'], function(){
