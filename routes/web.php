@@ -179,6 +179,7 @@ Route::group(['namespace' => 'SuperAdmin','middleware' => 'super_admin', 'prefix
 /************************ SCHOOL ADMIN ORGANIZATION ****************************/
 Route::group(['namespace' => 'SchoolAdmin', 'prefix' => 'school-admin'], function () {
     Route::get('/organization', 'OrganizationController@index')->name('school.organization.index');
+    Route::get('/audit-logs', 'AuditLogController@index')->name('school.audit.index');
     Route::post('/departments', 'OrganizationController@storeDepartment')->name('school.departments.store');
     Route::post('/teams', 'OrganizationController@storeTeam')->name('school.teams.store');
     Route::post('/roles', 'OrganizationController@storeRole')->name('school.roles.store');
