@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 class OrganizationController extends Controller {
- public function __construct(){ $this->middleware(['auth','subscription.active','teamSA']); }
+ public function __construct(){ $this->middleware(['auth','subscription.active','teamSA','permission:organization.manage','tenant.audit']); }
  public function index(Request $request){
   $schoolId=$request->user()->school_id; abort_unless($schoolId,403,'A school workspace is required.');
   $departments=SchoolDepartment::where('school_id',$schoolId)->with(['teams'=>function($q)use($schoolId){$q->where('school_id',$schoolId)->orderBy('name');}])->orderBy('name')->get();

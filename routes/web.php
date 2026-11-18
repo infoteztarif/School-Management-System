@@ -135,15 +135,15 @@ Route::group(['middleware' => ['auth', 'subscription.active']], function () {
 
         });
 
-        Route::resource('students', 'StudentRecordController');
-        Route::resource('users', 'UserController');
-        Route::resource('classes', 'MyClassController');
-        Route::resource('sections', 'SectionController');
-        Route::resource('subjects', 'SubjectController');
-        Route::resource('grades', 'GradeController');
-        Route::resource('exams', 'ExamController');
-        Route::resource('dorms', 'DormController');
-        Route::resource('payments', 'PaymentController');
+        Route::resource('students', 'StudentRecordController')->middleware(['permission:students.view', 'tenant.audit']);
+        Route::resource('users', 'UserController')->middleware(['permission:users.manage', 'tenant.audit']);
+        Route::resource('classes', 'MyClassController')->middleware(['permission:academics.manage', 'tenant.audit']);
+        Route::resource('sections', 'SectionController')->middleware(['permission:academics.manage', 'tenant.audit']);
+        Route::resource('subjects', 'SubjectController')->middleware(['permission:academics.manage', 'tenant.audit']);
+        Route::resource('grades', 'GradeController')->middleware(['permission:exams.manage', 'tenant.audit']);
+        Route::resource('exams', 'ExamController')->middleware(['permission:exams.manage', 'tenant.audit']);
+        Route::resource('dorms', 'DormController')->middleware(['permission:organization.manage', 'tenant.audit']);
+        Route::resource('payments', 'PaymentController')->middleware(['permission:payments.manage', 'tenant.audit']);
 
     });
 
@@ -179,6 +179,7 @@ Route::group(['namespace' => 'SuperAdmin','middleware' => 'super_admin', 'prefix
 /************************ SCHOOL ADMIN ORGANIZATION ****************************/
 Route::group(['namespace' => 'SchoolAdmin', 'prefix' => 'school-admin'], function () {
     Route::get('/organization', 'OrganizationController@index')->name('school.organization.index');
+    Route::get('/audit-logs', 'AuditLogController@index')->name('school.audit.index');
     Route::post('/departments', 'OrganizationController@storeDepartment')->name('school.departments.store');
     Route::post('/teams', 'OrganizationController@storeTeam')->name('school.teams.store');
     Route::post('/roles', 'OrganizationController@storeRole')->name('school.roles.store');
