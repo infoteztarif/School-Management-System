@@ -72,5 +72,7 @@ class Kernel extends HttpKernel
         'subscription.active' => \App\Http\Middleware\Custom\EnsureActiveSchoolSubscription::class,
         'permission' => \App\Http\Middleware\Custom\CheckPermission::class,
         'module.licensed' => \App\Http\Middleware\Custom\RequireLicensedModule::class,
+        'tenant.audit' => \App\Http\Middleware\Custom\AuditTenantMutation::class,
+        'session.track' => \App\Http\Middleware\Custom\TrackUserSession::class,
     ];
 }
