@@ -7,11 +7,14 @@ Route::get('/privacy-policy', 'HomeController@privacy_policy')->name('privacy_po
 Route::get('/terms-of-use', 'HomeController@terms_of_use')->name('terms_of_use');
 
 
-Route::group(['middleware' => ['auth', 'subscription.active']], function () {
+Route::group(['middleware' => ['auth', 'subscription.active', 'session.track']], function () {
 
     Route::get('/', 'HomeController@dashboard')->name('home');
     Route::get('/home', 'HomeController@dashboard')->name('home');
     Route::get('/dashboard', 'HomeController@dashboard')->name('dashboard');
+
+    Route::get('/sessions', 'SessionController@index')->name('sessions.index');
+    Route::delete('/sessions/{id}', 'SessionController@revoke')->name('sessions.revoke');
 
     Route::group(['prefix' => 'my_account'], function() {
         Route::get('/', 'MyAccountController@edit_profile')->name('my_account');
