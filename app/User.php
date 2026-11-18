@@ -35,6 +35,11 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+    public function userType()
+    {
+        return $this->belongsTo(\App\Models\UserType::class, 'user_type');
+    }
+
     public function school()
     {
         return $this->belongsTo(\App\Models\School::class);

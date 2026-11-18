@@ -18,8 +18,10 @@ class EnsureActiveSchoolSubscription
         $active = SchoolSubscription::where('school_id', $user->school_id)
             ->where('status', 'active')
             ->where('starts_at', '<=', now())
-            ->whereRaw('DATE_ADD(ends_at, INTERVAL grace_days DAY) >= ?', [now()])
-            ->exists();
+            ->get()
+            ->contains(function (SchoolSubscription $subscription) {
+                return $subscription->isAccessibleAt();
+            });
 
         abort_unless($active, 403, 'School subscription is inactive or expired.');
 
