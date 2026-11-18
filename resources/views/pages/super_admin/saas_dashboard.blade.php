@@ -43,6 +43,12 @@
         <a href="{{ route('saas.schools.index') }}" class="btn btn-primary">Manage Schools</a>
     </div>
 
+    <form method="GET" class="metric-card mb-3" style="display:grid;grid-template-columns:1fr 1fr auto;gap:.75rem">
+        <label>From<input class="form-control" type="date" name="from" value="{{ $from->format('Y-m-d') }}"></label>
+        <label>To<input class="form-control" type="date" name="to" value="{{ $to->format('Y-m-d') }}"></label>
+        <button class="btn btn-primary align-self-end">Apply filter</button>
+    </form>
+
     <div class="saas-grid">
         <div class="metric-card">
             <div class="metric-label">Schools</div>
