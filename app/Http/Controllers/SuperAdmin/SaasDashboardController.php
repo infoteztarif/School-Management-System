@@ -19,14 +19,18 @@ class SaasDashboardController extends Controller
     public function __invoke(Request $request)
     {
         $now = now();
+        $validated = $request->validate(['from' => 'nullable|date', 'to' => 'nullable|date|after_or_equal:from']);
+        $from = \Carbon\Carbon::parse($validated['from'] ?? $now->copy()->startOfMonth())->startOfDay();
+        $to = \Carbon\Carbon::parse($validated['to'] ?? $now)->endOfDay();
+        abort_if($from->diffInDays($to) > 366, 422, 'Date range cannot exceed 366 days.');
         $metrics = [
             'schools' => [
-                'total' => School::count(),
+                'total' => School::whereBetween('created_at', [$from, $to])->count(),
                 'active' => School::where('status', 'active')->count(),
                 'suspended' => School::where('status', 'suspended')->count(),
             ],
             'users' => [
-                'tenant_users' => User::whereNotNull('school_id')->count(),
+                'tenant_users' => User::whereNotNull('school_id')->whereBetween('created_at', [$from, $to])->count(),
                 'school_admins' => User::whereNotNull('school_id')
                     ->whereHas('userType', function ($query) {
                         $query->where('title', 'admin');
@@ -56,6 +60,6 @@ class SaasDashboardController extends Controller
             $query->latest('ends_at')->limit(1);
         }])->orderBy('name')->paginate(10);
 
-        return view('pages.super_admin.saas_dashboard', compact('metrics', 'schools'));
+        return view('pages.super_admin.saas_dashboard', compact('metrics', 'schools', 'from', 'to'));
     }
 }
