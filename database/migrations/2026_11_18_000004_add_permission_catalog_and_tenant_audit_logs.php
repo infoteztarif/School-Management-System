@@ -13,6 +13,9 @@ class AddPermissionCatalogAndTenantAuditLogs extends Migration {
    ['attendance.manage','Manage attendance','attendance'],['leave.manage','Manage leave','leave'],['payroll.manage','Manage payroll','payroll'],['transport.manage','Manage transport','transport'],['inventory.manage','Manage inventory','inventory'],['lms.manage','Manage LMS','lms'],
    ['audit.view','View audit logs','audit'],['import_export.manage','Import and export data','data'],['backup.manage','Manage backups','backup']
   ]; foreach($items as $i){DB::table('permissions')->updateOrInsert(['code'=>$i[0]],['name'=>$i[1],'module_code'=>$i[2],'created_at'=>$now,'updated_at'=>$now]);}
+  $permissionIds=DB::table('permissions')->pluck('id');
+  $adminRoleIds=DB::table('school_roles')->where('name','School Admin')->pluck('id');
+  foreach($adminRoleIds as $roleId){foreach($permissionIds as $permissionId){DB::table('role_permissions')->insertOrIgnore(['school_role_id'=>$roleId,'permission_id'=>$permissionId]);}}
  }
  public function down(){Schema::dropIfExists('tenant_audit_logs');}
 }
