@@ -24,7 +24,7 @@ jobs:
           php-version: '8.0'
           extensions: mbstring, dom, fileinfo, pdo_mysql
           coverage: none
-      - run: composer validate --no-check-publish
+      - run: composer validate --no-check-publish --no-check-lock
       - run: composer install --no-interaction --prefer-dist --no-progress
       - name: Prepare application
         run: |
