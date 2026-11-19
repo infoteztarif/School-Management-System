@@ -48,7 +48,7 @@ class CreateSaasLicensingTables extends Migration
             $table->unsignedInteger('grace_days')->default(0);
             $table->string('status', 20)->default('active');
             $table->text('pricing_note')->nullable();
-            $table->foreignId('decided_by')->constrained('users');
+            $table->unsignedInteger('decided_by'); $table->foreign('decided_by')->references('id')->on('users');
             $table->timestamps();
             $table->index(['school_id', 'status', 'starts_at', 'ends_at'], 'school_subscription_access_idx');
         });
@@ -61,7 +61,7 @@ class CreateSaasLicensingTables extends Migration
             $table->dateTime('starts_at');
             $table->dateTime('ends_at');
             $table->boolean('enabled')->default(true);
-            $table->foreignId('granted_by')->constrained('users');
+            $table->unsignedInteger('granted_by'); $table->foreign('granted_by')->references('id')->on('users');
             $table->timestamps();
             $table->unique(['school_id', 'module_id', 'subscription_id'], 'school_module_subscription_unique');
         });
@@ -70,7 +70,7 @@ class CreateSaasLicensingTables extends Migration
             $table->id();
             $table->foreignId('school_id')->constrained()->cascadeOnDelete();
             $table->foreignId('subscription_id')->nullable()->constrained('school_subscriptions')->nullOnDelete();
-            $table->foreignId('actor_id')->constrained('users');
+            $table->unsignedInteger('actor_id'); $table->foreign('actor_id')->references('id')->on('users');
             $table->string('action', 50);
             $table->json('before')->nullable();
             $table->json('after')->nullable();

@@ -48,12 +48,12 @@ class AddTenantIsolationAndRbac extends Migration
         Schema::create('user_school_roles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('school_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->unsignedInteger('user_id'); $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
             $table->foreignId('school_role_id')->constrained()->cascadeOnDelete();
             $table->dateTime('starts_at')->nullable();
             $table->dateTime('ends_at')->nullable();
             $table->boolean('active')->default(true);
-            $table->foreignId('assigned_by')->constrained('users');
+            $table->unsignedInteger('assigned_by'); $table->foreign('assigned_by')->references('id')->on('users');
             $table->timestamps();
             $table->unique(['school_id', 'user_id', 'school_role_id'], 'school_user_role_unique');
         });

@@ -33,8 +33,8 @@ class CreateSchoolOrganizationTables extends Migration
             $table->id();
             $table->foreignId('school_id')->constrained()->cascadeOnDelete();
             $table->foreignId('team_id')->constrained('school_teams')->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('assigned_by')->constrained('users');
+            $table->unsignedInteger('user_id'); $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
+            $table->unsignedInteger('assigned_by'); $table->foreign('assigned_by')->references('id')->on('users');
             $table->timestamps();
             $table->unique(['school_id', 'team_id', 'user_id'], 'school_team_user_unique');
         });
