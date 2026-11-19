@@ -23,6 +23,7 @@ class SecurityBaselineTest extends TestCase
 
     public function test_guest_cannot_delete_timetable_record(): void
     {
+        $this->withoutExceptionHandling();
         $this->delete('/timetables/records/1')->assertRedirect('/login');
     }
 }
