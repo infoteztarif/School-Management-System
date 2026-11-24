@@ -69,5 +69,10 @@ class Kernel extends HttpKernel
         'teamAccount' => \App\Http\Middleware\Custom\TeamAccount::class,
         'examIsLocked' => \App\Http\Middleware\Custom\ExamIsLocked::class,
         'my_parent' => \App\Http\Middleware\Custom\MyParent::class,
+        'subscription.active' => \App\Http\Middleware\Custom\EnsureActiveSchoolSubscription::class,
+        'permission' => \App\Http\Middleware\Custom\CheckPermission::class,
+        'module.licensed' => \App\Http\Middleware\Custom\RequireLicensedModule::class,
+        'tenant.audit' => \App\Http\Middleware\Custom\AuditTenantMutation::class,
+        'session.track' => \App\Http\Middleware\Custom\TrackUserSession::class,
     ];
 }

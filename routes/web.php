@@ -1,17 +1,20 @@
 <?php
 
-Auth::routes();
+Auth::routes(['register' => false]);
 
 //Route::get('/test', 'TestController@index')->name('test');
 Route::get('/privacy-policy', 'HomeController@privacy_policy')->name('privacy_policy');
 Route::get('/terms-of-use', 'HomeController@terms_of_use')->name('terms_of_use');
 
 
-Route::group(['middleware' => 'auth'], function () {
+Route::group(['middleware' => ['auth', 'subscription.active', 'session.track']], function () {
 
     Route::get('/', 'HomeController@dashboard')->name('home');
     Route::get('/home', 'HomeController@dashboard')->name('home');
     Route::get('/dashboard', 'HomeController@dashboard')->name('dashboard');
+
+    Route::get('/sessions', 'SessionController@index')->name('sessions.index');
+    Route::delete('/sessions/{id}', 'SessionController@revoke')->name('sessions.revoke');
 
     Route::group(['prefix' => 'my_account'], function() {
         Route::get('/', 'MyAccountController@edit_profile')->name('my_account');
@@ -23,10 +26,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::group(['namespace' => 'SupportTeam',], function(){
 
         /*************** Students *****************/
-        Route::group(['prefix' => 'students'], function(){
+        Route::group(['prefix' => 'students', 'middleware' => ['permission:students.view', 'tenant.audit']], function(){
             Route::get('reset_pass/{st_id}', 'StudentRecordController@reset_pass')->name('st.reset_pass');
             Route::get('graduated', 'StudentRecordController@graduated')->name('students.graduated');
-            Route::put('not_graduated/{id}', 'StudentRecordController@not_graduated')->name('st.not_graduated');
+            Route::put('not_graduated/{id}', 'StudentRecordController@not_graduated')->name('st.not_graduated')->middleware('teamSA');
             Route::get('list/{class_id}', 'StudentRecordController@listByClass')->name('students.list')->middleware('teamSAT');
 
             /* Promotions */
@@ -40,12 +43,12 @@ Route::group(['middleware' => 'auth'], function () {
         });
 
         /*************** Users *****************/
-        Route::group(['prefix' => 'users'], function(){
+        Route::group(['prefix' => 'users', 'middleware' => ['permission:users.manage', 'tenant.audit']], function(){
             Route::get('reset_pass/{id}', 'UserController@reset_pass')->name('users.reset_pass');
         });
 
         /*************** TimeTables *****************/
-        Route::group(['prefix' => 'timetables'], function(){
+        Route::group(['prefix' => 'timetables', 'middleware' => ['permission:timetable.manage', 'tenant.audit']], function(){
             Route::get('/', 'TimeTableController@index')->name('tt.index');
 
             Route::group(['middleware' => 'teamSA'], function() {
@@ -66,7 +69,7 @@ Route::group(['middleware' => 'auth'], function () {
 
                 Route::get('show/{ttr}', 'TimeTableController@show_record')->name('ttr.show');
                 Route::get('print/{ttr}', 'TimeTableController@print_record')->name('ttr.print');
-                Route::delete('/{ttr}', 'TimeTableController@delete_record')->name('ttr.destroy');
+                Route::delete('/{ttr}', 'TimeTableController@delete_record')->name('ttr.destroy')->middleware('teamSA');
 
             });
 
@@ -82,7 +85,7 @@ Route::group(['middleware' => 'auth'], function () {
         });
 
         /*************** Payments *****************/
-        Route::group(['prefix' => 'payments'], function(){
+        Route::group(['prefix' => 'payments', 'middleware' => ['permission:payments.manage', 'tenant.audit']], function(){
 
             Route::get('manage/{class_id?}', 'PaymentController@manage')->name('payments.manage');
             Route::get('invoice/{id}/{year?}', 'PaymentController@invoice')->name('payments.invoice');
@@ -95,7 +98,7 @@ Route::group(['middleware' => 'auth'], function () {
         });
 
         /*************** Pins *****************/
-        Route::group(['prefix' => 'pins'], function(){
+        Route::group(['prefix' => 'pins', 'middleware' => ['permission:users.manage', 'tenant.audit']], function(){
             Route::get('create', 'PinController@create')->name('pins.create');
             Route::get('/', 'PinController@index')->name('pins.index');
             Route::post('/', 'PinController@store')->name('pins.store');
@@ -105,7 +108,7 @@ Route::group(['middleware' => 'auth'], function () {
         });
 
         /*************** Marks *****************/
-        Route::group(['prefix' => 'marks'], function(){
+        Route::group(['prefix' => 'marks', 'middleware' => ['permission:marks.manage', 'tenant.audit']], function(){
 
            // FOR teamSA
             Route::group(['middleware' => 'teamSA'], function(){
@@ -135,15 +138,15 @@ Route::group(['middleware' => 'auth'], function () {
 
         });
 
-        Route::resource('students', 'StudentRecordController');
-        Route::resource('users', 'UserController');
-        Route::resource('classes', 'MyClassController');
-        Route::resource('sections', 'SectionController');
-        Route::resource('subjects', 'SubjectController');
-        Route::resource('grades', 'GradeController');
-        Route::resource('exams', 'ExamController');
-        Route::resource('dorms', 'DormController');
-        Route::resource('payments', 'PaymentController');
+        Route::resource('students', 'StudentRecordController')->middleware(['permission:students.view', 'tenant.audit']);
+        Route::resource('users', 'UserController')->middleware(['permission:users.manage', 'tenant.audit']);
+        Route::resource('classes', 'MyClassController')->middleware(['permission:academics.manage', 'tenant.audit']);
+        Route::resource('sections', 'SectionController')->middleware(['permission:academics.manage', 'tenant.audit']);
+        Route::resource('subjects', 'SubjectController')->middleware(['permission:academics.manage', 'tenant.audit']);
+        Route::resource('grades', 'GradeController')->middleware(['permission:exams.manage', 'tenant.audit']);
+        Route::resource('exams', 'ExamController')->middleware(['permission:exams.manage', 'tenant.audit']);
+        Route::resource('dorms', 'DormController')->middleware(['permission:organization.manage', 'tenant.audit']);
+        Route::resource('payments', 'PaymentController')->middleware(['permission:payments.manage', 'tenant.audit']);
 
     });
 
@@ -161,7 +164,31 @@ Route::group(['namespace' => 'SuperAdmin','middleware' => 'super_admin', 'prefix
 
     Route::get('/settings', 'SettingController@index')->name('settings');
     Route::put('/settings', 'SettingController@update')->name('settings.update');
+    Route::get('/dashboard', 'SaasDashboardController')->name('saas.dashboard');
 
+    Route::get('/schools', 'SchoolController@index')->name('saas.schools.index');
+    Route::post('/schools', 'SchoolController@store')->name('saas.schools.store');
+    Route::get('/schools/{school}', 'SchoolController@show')->name('saas.schools.show');
+    Route::put('/schools/{school}', 'SchoolController@update')->name('saas.schools.update');
+    Route::patch('/schools/{school}/status', 'SchoolController@setStatus')->name('saas.schools.status');
+    Route::get('/schools/{school}/admins', 'SchoolAdminController@index')->name('saas.school_admins.index');
+    Route::post('/school-admins', 'SchoolAdminController@store')->name('saas.school_admins.store');
+
+    Route::post('/subscriptions', 'SchoolSubscriptionController@store')->name('saas.subscriptions.store');
+    Route::put('/subscriptions/{subscription}', 'SchoolSubscriptionController@update')->name('saas.subscriptions.update');
+
+});
+
+/************************ SCHOOL ADMIN ORGANIZATION ****************************/
+Route::group(['namespace' => 'SchoolAdmin', 'prefix' => 'school-admin'], function () {
+    Route::get('/organization', 'OrganizationController@index')->name('school.organization.index');
+    Route::get('/audit-logs', 'AuditLogController@index')->name('school.audit.index');
+    Route::get('/reports', 'ReportController@index')->name('school.reports.index');
+    Route::get('/reports/export/{type}', 'ReportController@export')->name('school.reports.export');
+    Route::post('/departments', 'OrganizationController@storeDepartment')->name('school.departments.store');
+    Route::post('/teams', 'OrganizationController@storeTeam')->name('school.teams.store');
+    Route::post('/roles', 'OrganizationController@storeRole')->name('school.roles.store');
+    Route::put('/roles/{roleId}/permissions', 'OrganizationController@syncPermissions')->name('school.roles.permissions.sync');
 });
 
 /************************ PARENT ****************************/
